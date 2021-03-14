@@ -1,0 +1,8 @@
+# Cmake
+CMakeLists.txt.user
+
+# Executables
+bin/*
+
+# Build files
+build-*
