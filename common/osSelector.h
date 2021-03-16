@@ -16,6 +16,7 @@ constexpr supportedOS osSelector()
     #define OSSELECTOR_WIN
 #elif _WIN32
     return supportedOS::windows;//Windows (32-bit)
+    #define OSSELECTOR_WIN
 #elif __APPLE__
     //apple isn't supported
 #elif __linux

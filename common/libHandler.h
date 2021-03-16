@@ -15,29 +15,36 @@
 namespace libHandler{
 using namespace types;
 
+using res_t = lib::helperT<helper::osSelector()>::res_t;
+
 /*
  * crossplatfrom function to load dll/so
  */
 void* loadLib(Str name)
 {
-    auto res = lib::loadLibImpl<helper::osSelector()>(name);
+    auto res = lib::loadLibImpl<res_t>(name);
     if (nullptr == res) {
         std::cout << "cannot locate the .dll/.so file=" << name << std::endl;
     } else {
         std::cout << "it has been loaded" << std::endl;
     }
-    return res;
+    return static_cast<void*>(res);
 }
 
 bool unloadLib(void* h)
 {
-    auto res = lib::unloadLibImpl<helper::osSelector()>(h);
+    auto res = lib::unloadLibImpl<res_t>(h);
     if (res) {
         std::cout << ".dll/.so unloaded SUCCESS\n";
     } else {
         std::cout << ".dll/.so unloaded WRONG\n";
     }
     return res;
+}
+
+template<typename F>
+F getFunc(void* handler, types::Str nameF) {
+    return lib::getLibFunctionImpl<F>(handler, nameF);
 }
 
 struct dlib {
@@ -69,6 +76,9 @@ struct dlib {
         std::cout << "dlib, unknown exception" << std::endl;
         throw;
     }
+    ~dlib() = default;
+    void* handle(){return _handle.get();}
+    types::Str name()const{return _name;};
 private:
     std::shared_ptr<void> _handle;
     types::Str _name;

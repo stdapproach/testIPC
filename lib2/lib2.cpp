@@ -7,7 +7,7 @@
  */
 int foo()
 {
-    return 42;
+    return 43;
 }
 
 /*
@@ -15,7 +15,7 @@ int foo()
  */
 types::Str handlerName()
 {
-    static const types::Str name{"Type_A"};
+    static const types::Str name{"Type_B"};
     return name;
 }
 
@@ -24,6 +24,6 @@ types::Str handlerName()
  */
 int handlerFunc(types::Str str)
 {
-    int mockResult = std::string(str).size();
+    int mockResult = std::string(str).size()*2;
     return mockResult;
 }

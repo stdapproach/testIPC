@@ -8,14 +8,20 @@ namespace lib {
 /*
  * common function to load dll/so
  */
-template<helper::supportedOS os>
-void* loadLibImpl(types::Str name);
+template<typename U>
+U loadLibImpl(types::Str name);
 
 /*
  * common function to unload dll/so
  */
+template<typename T>
+bool unloadLibImpl(T handler);
+
+/*
+ * helper for manipulate by types depending OS's type
+ */
 template<helper::supportedOS os>
-bool unloadLibImpl(void* handler);
+struct helperT;
 
 }
 

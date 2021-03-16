@@ -1,22 +1,22 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(lib1 LANGUAGES CXX)
+project(lib2 LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_library(lib1 SHARED
+add_library(lib2 SHARED
   ../common/lib_global.h
   ../common/libCommon.h
-  lib1.cpp
+  lib2.cpp
 )
 
-set_target_properties(lib1
+set_target_properties(lib2
     PROPERTIES
         LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../build
         RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../bin
 )
 
 include_directories(../common)
-target_compile_definitions(lib1 PRIVATE LIB1_LIBRARY)
+target_compile_definitions(lib2 PRIVATE LIB1_LIBRARY)
