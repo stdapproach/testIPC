@@ -14,7 +14,7 @@ add_library(lib1 SHARED
 
 set_target_properties(lib1
     PROPERTIES
-        LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../build
+        LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../bin
         RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../bin
 )
 

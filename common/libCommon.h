@@ -2,12 +2,11 @@
 #define LIB1_H
 
 #include "lib_global.h"
-#include "types.h"
 
 extern "C" {
 LIB1_EXPORT int foo();
-LIB1_EXPORT types::Str handlerName();
-LIB1_EXPORT int handlerFunc(types::Str str);
+LIB1_EXPORT const char* handlerName();
+LIB1_EXPORT int handlerFunc(const char* str);
 }
 
 #endif // LIB1_H

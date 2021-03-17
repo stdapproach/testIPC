@@ -10,9 +10,6 @@ using namespace std;
 int main(int argc, char *argv[])
 {
     cout << "gateway: argc=" << argc << endl;
-    for(auto i=0; i<argc; ++i) {
-        cout << "i=" << i << ", param=" << argv[i] << endl;
-    }
 
     std::vector<libHandler::dlib> vec;
     using fName = gateaway::handlerRegistr::fName;
@@ -24,7 +21,7 @@ int main(int argc, char *argv[])
             vec.emplace_back(argv[i]);
         }
         std::for_each(begin(vec), end(vec),
-            [&vH](auto dl) {
+            [&vH](auto& dl) {
                 auto f1 = libHandler::getFunc<fName>(dl.handle(), "handlerName");
                 auto f2 = libHandler::getFunc<Func>(dl.handle(), "handlerFunc");
                 if (f1 && f2) {
@@ -35,7 +32,8 @@ int main(int argc, char *argv[])
         });
         for(auto it: vH) {
             const auto mockParam{"QQQ"};
-            cout << "name=" << it.first() << ", res(" << mockParam <<")=" <<it.second(mockParam) << endl;
+            cout << "name=" << it.first() << ", res(" << mockParam <<")="
+                 << it.second(mockParam) << endl;
         }
     }
 

@@ -13,16 +13,16 @@ int foo()
 /*
  * provide name for Handler
  */
-types::Str handlerName()
+const char* handlerName()
 {
-    static const types::Str name{"Type_A"};
+    static const char* name{"Type_A"};
     return name;
 }
 
 /*
  * provide Handler's function
  */
-int handlerFunc(types::Str str)
+int handlerFunc(const char* str)
 {
     int mockResult = std::string(str).size();
     return mockResult;

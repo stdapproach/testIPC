@@ -3,12 +3,12 @@
 
 #include <type_traits>
 #include <map>
-#include "types.h"
 
 namespace gateaway {
+using strT = std::string;
 
 struct handlerRegistr {
-    using key_t = types::Str;
+    using key_t = const char* ;
 
     using fName = key_t(*)();
     using Func = int (*)(key_t str);

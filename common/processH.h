@@ -6,16 +6,16 @@
 #include <string>
 #include <algorithm>
 
-#include "types.h"
-
 /*
  * to handle processes
  */
 namespace process {
 
+using strT = std::string;
+
 struct descr {
-    types::Str processFullPath;
-    std::vector<types::Str> params;
+    strT processFullPath;
+    std::vector<strT> params;
 
     /*
      * make the string to run process with add. params

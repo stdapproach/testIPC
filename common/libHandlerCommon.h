@@ -1,15 +1,16 @@
 #ifndef LIHANDLERCOMMON_H
 #define LIHANDLERCOMMON_H
 
+#include <string>
 #include "osSelector.h"
-#include "types.h"
 
 namespace lib {
+using strT = std::string;
 /*
  * common function to load dll/so
  */
 template<typename U>
-U loadLibImpl(types::Str name);
+U loadLibImpl(strT name);
 
 /*
  * common function to unload dll/so
