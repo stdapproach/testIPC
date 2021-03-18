@@ -7,7 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(EXECUTABLE_OUTPUT_PATH  ${PROJECT_SOURCE_DIR}/../bin)
 
-include_directories(../common)
+include_directories(../common
+    ../_prelim/common)
 
 add_executable(gateway main.cpp
     gateway.h
@@ -16,4 +17,4 @@ add_executable(gateway main.cpp
     ../common/libHandler_Win.h
     ../common/libHandler_Nix.h
     )
-target_link_libraries(gateway -ldl)
+target_link_libraries(gateway -ldl -lrt)#qqq
