@@ -18,6 +18,8 @@ static auto pid{processHelper::getpid()};
 /*
  * argv[0] - file name
  * argv[1] - (optional) sharedMemory\s name
+ * argv[2] - (optional) sharedMemory\s size
+ * argv[3..] - (optional) names for preloaded libs
  */
 int main(int argc, char *argv[])
 {
@@ -31,7 +33,6 @@ int main(int argc, char *argv[])
 
     if (argc>3) {
         cout << "name(SM1)=" << argv[1] << endl;
-        //cout << "size(SM1)=" << argv[2] << endl;
         auto ID1{argv[1]};
         uint size1{0};
         {
@@ -44,7 +45,7 @@ int main(int argc, char *argv[])
                     std::cout << "error";
                     return -1;
                 }
-            }  catch (...) {
+            } catch (...) {
                 cout << "wrong conversion char[] to int\n";
                 return -1;
             }
@@ -67,7 +68,6 @@ int main(int argc, char *argv[])
             //convert vector to map
             for (auto it: vH) {
                 auto name = it.first();
-                //cout << "adding " << name << "[[ to map\n";
                 vMap.emplace(name, it.second);
             }
         }

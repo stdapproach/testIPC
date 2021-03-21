@@ -6,12 +6,16 @@
 #include <string>
 #include <algorithm>
 
+#include <unistd.h>
+
 /*
  * to handle processes
  */
-namespace process {
-
+namespace processHelper {
+using _t = pid_t;
 using strT = std::string;
+
+_t getpid(){return ::getpid();}
 
 struct descr {
     strT processFullPath;

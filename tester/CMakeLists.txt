@@ -8,12 +8,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(EXECUTABLE_OUTPUT_PATH  ${PROJECT_SOURCE_DIR}/../bin)
 
 include_directories(../common
-    ../_prelim/common
     ../smLib
 )
 
 add_executable(tester main.cpp
-    ../common/processH.h
+    ../common/processHelper.h
     ../common/ipcH.h)
 
 find_library(LIB_SM smLib-static ../build)

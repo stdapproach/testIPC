@@ -10,6 +10,8 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../build)
 set(SOURCE_FILES sm.cpp
     writeHelper.cpp
     writer.cpp
+    readHelper.cpp
+    reader.cpp
 )
 set(HEADER_FILES sm_public.h
     memHelper.h
@@ -18,6 +20,8 @@ set(HEADER_FILES sm_public.h
     resHelper.h
     writeHelper.h
     writer.h
+    readHelper.h
+    reader.h
 )
 
 add_library(smLib-static STATIC ${HEADER_FILES} ${SOURCE_FILES})

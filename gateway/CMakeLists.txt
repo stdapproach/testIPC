@@ -8,13 +8,22 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(EXECUTABLE_OUTPUT_PATH  ${PROJECT_SOURCE_DIR}/../bin)
 
 include_directories(../common
-    ../_prelim/common)
+    ../smLib
+)
 
 add_executable(gateway main.cpp
     gateway.h
+    ../common/processHelper.h
     ../common/libHandler.h
     ../common/libHandlerCommon.h
     ../common/libHandler_Win.h
     ../common/libHandler_Nix.h
     )
-target_link_libraries(gateway -ldl -lrt)#qqq
+
+find_library(LIB_SM smLib-static ../build)
+
+target_link_libraries(gateway
+    ${LIB_SM}
+    -ldl
+    -lrt
+)

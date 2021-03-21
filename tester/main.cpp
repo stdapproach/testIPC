@@ -2,7 +2,7 @@
 #include <string>
 #include <functional>
 
-#include "processH.h"
+#include "processHelper.h"
 #include "osSelector.h"
 #include "ipcH.h"
 
@@ -70,7 +70,7 @@ std::string mkRunningString(strT rawName, smDescr descr, std::vector<strT> preLo
 
         return res;
     };
-    process::descr procDescr{helper.getFullExecName(rawName), makeParamsRunningFor()};
+    processHelper::descr procDescr{helper.getFullExecName(rawName), makeParamsRunningFor()};
     return procDescr.toStr();
 }
 }
