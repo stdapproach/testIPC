@@ -9,10 +9,16 @@ set(EXECUTABLE_OUTPUT_PATH  ${PROJECT_SOURCE_DIR}/../bin)
 
 include_directories(../common
     ../_prelim/common
+    ../smLib
 )
 
 add_executable(tester main.cpp
     ../common/processH.h
     ../common/ipcH.h)
 
-target_link_libraries(tester -lrt)#qqq
+find_library(LIB_SM smLib-static ../build)
+
+target_link_libraries(tester
+    ${LIB_SM}
+    -lrt
+    )
