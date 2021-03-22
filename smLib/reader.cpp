@@ -16,7 +16,7 @@ Reader::Reader(storageDesr_t storageID, storage_size_t size)
 
 std::string Reader::read() const {
     if (!_ready) {
-        throw("impossible read from non-ready memory");
+        throw("Reader: impossible read from non-ready memory");
     }
     std::unique_ptr<char[]> ptr(new char[_size]);
     readHelper::copyFromSM(_mem, _size, ptr.get());

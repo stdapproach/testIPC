@@ -69,7 +69,7 @@ struct dlib {
         throw;
     }
     catch(...) {
-        std::cout << "dlib, unknown exception" << std::endl;
+        std::cout << "dlib, unknown exception\n";
         throw;
     }
     ~dlib() = default;

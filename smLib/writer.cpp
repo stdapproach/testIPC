@@ -1,9 +1,12 @@
 #include "writer.h"
 
+#include <memory>
+#include "readHelper.h"
+
 namespace sm {
 
-Writer::Writer(storageDesr_t storageID, storage_size_t size)
-    :base(storageID, size) {
+Writer::Writer(storageDesr_t storageID, storage_size_t size, std::string internalID, bool unlinkRequired)
+    :base(storageID, size), _internalID{internalID}, _unlinkRequired{unlinkRequired} {
     const auto res{openRW()};
     if(res.hasError()) {
         errHandler(res);
@@ -20,8 +23,13 @@ Writer::Writer(storageDesr_t storageID, storage_size_t size)
     }
 }
 
+void Writer::debugPrintout(std::string postfix)const {
+    std::cerr << "nonReady Writer, id=" << _internalID.c_str() << postfix << std::endl;
+}
+
 void Writer::write(std::string data) const{
     if (!_ready) {
+        debugPrintout(": write");
         throw("impossible write to non-ready memory");
     }
     writeHelper::copyToSM(data, _mem);
@@ -29,13 +37,16 @@ void Writer::write(std::string data) const{
 
 Writer::~Writer() {
     try {
+        std::cout << "start Writer::~Writer, id=" << _internalID << std::endl;
         const auto res{cleanup()};
         if(res.hasError()) {
             errHandler(res);
         } else {
-            const auto res{unlink()};
-            if(res.hasError()) {
-                errHandler(res);
+            if (_unlinkRequired) {
+                const auto res{unlink()};
+                if(res.hasError()) {
+                    errHandler(res);
+                }
             }
         }
         if(_lastError.has()) {
@@ -45,6 +56,17 @@ Writer::~Writer() {
     }  catch (...) {
         std::cerr << "Writer::~Writer exception raised\n";
     }
+}
+
+std::string Writer::read() const {
+    if (!_ready) {
+        debugPrintout(": read");
+        throw("Writer: impossible read from non-ready memory");
+    }
+    std::unique_ptr<char[]> ptr(new char[_size]);
+    readHelper::copyFromSM(_mem, _size, ptr.get());
+    std::string res(&ptr[0], &ptr[0] + _size);
+    return res;
 }
 
 res_t Writer::openRW() {
@@ -70,6 +92,7 @@ resHelper::res_t<descr_t> Writer::mapM() {
 res_t Writer::cleanup() {
     auto res{writeHelper::mapCleanup(_mem, _size)};
     if(res.hasError()) {
+        debugPrintout(": cleanup");
         const auto& err = res.error;
         perror(err.descr.c_str());
         return err.code;
@@ -80,6 +103,7 @@ res_t Writer::cleanup() {
 res_t Writer::unlink() {
     auto res{writeHelper::unlink(_storageID)};
     if(res.hasError()) {
+        debugPrintout(": unlink");
         const auto& err = res.error;
         perror(err.descr.c_str());
         return err.code;

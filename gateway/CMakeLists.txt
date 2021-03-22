@@ -27,4 +27,5 @@ target_link_libraries(gateway
     ${LIB_SM}
     -ldl
     -lrt
+    -lpthread
 )

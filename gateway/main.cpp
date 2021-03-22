@@ -7,12 +7,16 @@
 #include "libHandler.h"
 #include "gateway.h"
 #include "reader.h"
+#include "sem.h"
+
+#include "ipcH.h"
 
 #include "processHelper.h"
 
 using namespace std;
 
 namespace {
+using PCh = const char*;
 static auto pid{processHelper::getpid()};
 
 using fName = gateaway::handlerRegistr::fName;
@@ -40,15 +44,22 @@ std::vector<TStr> toVector(int argc, char *argv[]) {
 
 static const size_t indexSM_Name{1};
 static const size_t indexSM_Size{2};
-static const size_t startIndexForLibs{3};
+static const size_t semaphoreName{3};
+static const size_t startIndexForLibs{4};
+
+resHelper::res_t<TStr> getNonEmptyString(uint index, std::vector<TStr> params) {
+    if (index >= params.size()) {
+        return resHelper::err_t{1, "index out of bound"};
+    }
+    auto res = params[index];
+    if (res.empty()) {
+        return resHelper::err_t{2, "empty string"};
+    }
+    return {res};
+}
 
 resHelper::res_t<TStr> getSM_Name(std::vector<TStr> params) {
-    auto res = params.at(indexSM_Name);
-    if (!res.empty()) {
-        return {res};
-    } else {
-        return resHelper::err_t{1, "empty name(SM)"};
-    }
+    return getNonEmptyString(indexSM_Name, params);
 }
 
 resHelper::res_t<uint> getSM_Size(std::vector<TStr> params) {
@@ -85,7 +96,7 @@ resHelper::res_t<bool> addFuncToDict(libHandler::dlib& dl, TDict& dict) {
     return resHelper::err_t{defCodeErr, "null function pointer"};
 }
 
-resHelper::res_t<std::pair<TStr, TStr>> gettingDataFromSM(const char* name, uint size) {
+resHelper::res_t<std::pair<TStr, TStr>> gettingDataFromSM(PCh name, uint size) {
     try {
         sm::Reader reader(name, size);
         auto buff = reader.read();
@@ -104,9 +115,10 @@ resHelper::res_t<std::pair<TStr, TStr>> gettingDataFromSM(const char* name, uint
 
 /*
  * argv[0] - file name
- * argv[1] - (optional) sharedMemory\s name
- * argv[2] - (optional) sharedMemory\s size
- * argv[3..] - (optional) names for preloaded libs
+ * argv[1] - sharedMemory\s name
+ * argv[2] - sharedMemory\s size
+ * argv[3] - semaphor's name
+ * argv[4..] - (optional) names for preloaded libs
  */
 int main(int argc, char *argv[])
 {
@@ -116,7 +128,7 @@ int main(int argc, char *argv[])
     std::map<TStr, Func> Dict;
     auto vArgv = toVector(argc, argv);
 
-    if (vArgv.size() > 3) {
+    if (vArgv.size() > 4) {
         resHelper::res_t<TStr> nameSM = getSM_Name(vArgv);
         if(nameSM.hasError()) {
             return resHelper::retErr(nameSM);
@@ -130,6 +142,14 @@ int main(int argc, char *argv[])
         }
         uint sizeSM{resSizeSM.val};
         std::cout << "size(SM1)=" << sizeSM <<endl;
+
+        auto rawSemName = getNonEmptyString(semaphoreName, vArgv);
+        if (rawSemName.hasError()) {
+            return resHelper::retErr(rawSemName);
+        }
+        auto semName = rawSemName.val;
+        cout << "semName=" << semName << endl;
+
 
         cout << "prepared handlers from auto-loaded dLib\n";
         {//first fulfilling of Dict
@@ -175,6 +195,19 @@ int main(int argc, char *argv[])
             //invoking
             const auto RESULT{it->second(serviceParam.c_str())};
             cout << "RESULT=" << RESULT << endl;
+
+            //write result
+            ipc::Writer writer{idSM, sizeSM, "Gateway"};
+
+            sm::Sem sem{semName.c_str()};
+            sem.acquire();
+            printf("Gateway: I am done! Release Semaphore\n");
+            {
+                writer.write("QQQ_AAA_ZZZ");
+            }
+            if (sem_post(sem.id()) < 0)
+                cerr << "Gateway: [sem_post] Failed \n";
+            cout << "Gateway: ok releasing sem\n";
         }
     } else {
         cerr << "not enough parameters to invoke\n";

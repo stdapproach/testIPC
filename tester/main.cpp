@@ -6,26 +6,25 @@
 #include "libHandler.h"
 #include "osSelector.h"
 #include "ipcH.h"
+#include "sem.h"
 
 #include "sm_public.h"
 
 namespace {
 using strT = std::string;
-}
-
-namespace {
+using PCh = const char*;
 
 constexpr auto os{helper::osSelector()};
 
 struct smDescr {
-    const char* name;
+    PCh name;
     const sm::storage_size_t size;
     smDescr() = delete;
 };
 
 struct testEnv {
-    const char* serviceName;
-    const char* argument;
+    PCh serviceName;
+    PCh argument;
 };
 
 std::string mkData(testEnv env) {
@@ -43,13 +42,14 @@ Container transform_container(const Container& c, Functor &&f)
     return ret;
 }
 
-std::string mkRunningString(strT rawName, smDescr descr, std::vector<strT> preLoadedLib) {
+std::string mkRunningString(strT rawName, smDescr descr, PCh semName, std::vector<strT> preLoadedLib) {
     auto helper = libHandler::helperT<os>{};
-    auto makeParamsRunningFor = [&descr, &helper, &preLoadedLib]() {
+    auto makeParamsRunningFor = [&descr, &helper, &preLoadedLib, semName]() {
         using namespace std::placeholders;
         std::vector<strT> res {
                     descr.name,
-                    std::to_string(descr.size)
+                    std::to_string(descr.size),
+                    semName
                 };
         auto adjNames = transform_container(
                     preLoadedLib,
@@ -69,18 +69,33 @@ int main()
     using namespace std;
 
     cout << "Tester: Starting" << endl;
-    const smDescr sm1{"/sm1", 128};
+    const smDescr sm1{"/smIn", 128};
     const strT rawName{"gateway"};
     const std::vector<strT> preLoadedLib{"liblib1", "liblib2"};
     testEnv tEnv{"Type_C", "123456"};
     auto helper = libHandler::helperT<os>{};
+    PCh semName{"/sem5"};
     try {
-        ipc::Writer writer{sm1.name, sm1.size};
+        sm::Sem sem(semName);
+        cout << "Tester: acquire\n";
+        sem.acquire();
+
+        const bool unlinkRequired{false};
+        ipc::Writer writer{sm1.name, sm1.size, "Tester", unlinkRequired};
         writer.write(mkData(tEnv));
 
-        auto paramForRun = mkRunningString(rawName, sm1, preLoadedLib);
+        auto paramForRun = mkRunningString(rawName, sm1, semName, preLoadedLib);
         system(paramForRun.c_str());
-        sleep(10);
+        cout << "QQQ_0\n";
+        {
+            if (sem_wait(sem.id()) < 0 )
+                perror("QQQ_sem_wait");
+            if ( sem_close(sem.id()) < 0 )
+                perror("QQQ_sem_close");
+        }
+        cout << "QQQ_1\n";
+        auto reternedResult = writer.read();
+        cout << "QQQ_2_returnedResult=" << reternedResult.c_str() << endl;
     }  catch (...) {
         cout << "Tester: unknown exception raised" << endl;
         throw ;

@@ -12,11 +12,13 @@ using res_t = memHelper::res_t;
 
 struct Writer final : memHelper::base {
     Writer() = delete;
+    Writer(const Writer&) = delete;
+    Writer& operator=(Writer&) = delete;
     /*
      * ctr
      * params: name and size of SM
      */
-    Writer(storageDesr_t storageID, storage_size_t size);
+    Writer(storageDesr_t storageID, storage_size_t size, std::string internalID, bool unlinkRequired = true);
 
     /*
      * place data into memory
@@ -26,7 +28,12 @@ struct Writer final : memHelper::base {
 
     ~Writer();
 
+    std::string read() const;
+
 private:
+    std::string _internalID;
+    void debugPrintout(std::string postfix)const;
+    bool _unlinkRequired;
     /*
      * open shared memory (read/write)
      */

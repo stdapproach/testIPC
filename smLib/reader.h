@@ -3,8 +3,8 @@
 
 #include <memory>
 
-#include "readHelper.h"
 #include "memHelper.h"
+#include "readHelper.h"
 
 namespace sm {
 using storageDesr_t = memHelper::storageDesr_t;
@@ -19,6 +19,8 @@ using res_t = memHelper::res_t;
  */
 struct Reader : memHelper::base  {
     Reader() = delete;
+    Reader(const Reader&) = delete;
+    Reader& operator=(const Reader&) = delete;
 
     /*
      * ctr

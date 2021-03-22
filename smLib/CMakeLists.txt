@@ -25,6 +25,7 @@ set(HEADER_FILES sm_public.h
     writer.h
     readHelper.h
     reader.h
+    sem.h
 )
 
 add_library(smLib-static STATIC ${HEADER_FILES} ${SOURCE_FILES})

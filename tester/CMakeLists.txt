@@ -13,7 +13,9 @@ include_directories(../common
 
 add_executable(tester main.cpp
     ../common/processHelper.h
-    ../common/ipcH.h)
+    ../common/ipcH.h
+    ../smLib/sem.h
+)
 
 find_library(LIB_SM smLib-static ../build)
 
@@ -21,4 +23,5 @@ target_link_libraries(tester
     ${LIB_SM}
     -ldl
     -lrt
+    -lpthread
     )
