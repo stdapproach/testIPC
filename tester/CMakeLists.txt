@@ -19,5 +19,6 @@ find_library(LIB_SM smLib-static ../build)
 
 target_link_libraries(tester
     ${LIB_SM}
+    -ldl
     -lrt
     )

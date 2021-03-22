@@ -80,6 +80,23 @@ private:
     strT _name;
 };
 
+template<helper::supportedOS os>
+struct helperT;
+
+template<>
+struct helperT<helper::supportedOS::posix> {
+    const strT prefix{"./"};
+    const strT prefixLib{"lib"};
+    const strT postfixDLib{".so"};
+    const strT postfixExec{""};
+    strT getFullExecName(strT rawName) {
+        return prefix + rawName + postfixExec;
+    }
+    strT getFullDLibName(strT rawName) {
+        return prefix + rawName + postfixDLib;
+    }
+};
+
 }
 
 #endif // LIBHANDLER_H

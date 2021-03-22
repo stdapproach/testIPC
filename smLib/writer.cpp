@@ -39,7 +39,7 @@ Writer::~Writer() {
             }
         }
         if(_lastError.has()) {
-            std::cerr << "~Writer() Error: " <<_lastError.descr.c_str() << std::endl;
+            std::cerr << "~Writer() Error: " << _lastError.descr.c_str() << std::endl;
         }
 
     }  catch (...) {

@@ -2,6 +2,7 @@
 #define RESHELPER_H
 
 #include <string>
+#include <iostream>
 
 namespace resHelper {
 static const int no_err{0};
@@ -24,6 +25,13 @@ struct res_t {
 private:
     bool hasResult{false};
 };
+
+template <typename T>
+int retErr(const res_t<T>& res) {
+    std::cerr << res.error.descr.c_str() << std::endl;
+    return res.error.code;
+}
+
 }
 
 #endif // RESHELPER_H

@@ -26,7 +26,7 @@ std::string Reader::read() const {
 
 Reader::~Reader() {
     if(_lastError.has()) {
-        std::cerr << "~Reader() Error: " <<_lastError.descr.c_str() << std::endl;
+        std::cerr << "~Reader() Error: " << _lastError.descr.c_str() << std::endl;
     }
 }
 
