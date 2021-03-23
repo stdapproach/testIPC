@@ -10,6 +10,9 @@ using storage_size_t = memHelper::storage_size_t;
 using descr_t = memHelper::descr_t;
 using res_t = memHelper::res_t;
 
+/*
+ * Writer to SharedMemory
+ */
 struct Writer final : memHelper::base {
     Writer() = delete;
     Writer(const Writer&) = delete;
@@ -28,6 +31,9 @@ struct Writer final : memHelper::base {
 
     ~Writer();
 
+    /*
+     * get data from SM
+     */
     std::string read() const;
 
 private:

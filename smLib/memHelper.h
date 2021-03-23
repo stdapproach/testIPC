@@ -6,6 +6,9 @@
 
 namespace memHelper {
 
+/*
+ * Base class for SharedMemory handling
+ */
 struct base {
     base() = delete;
     base(storageDesr_t storageID, storage_size_t size)

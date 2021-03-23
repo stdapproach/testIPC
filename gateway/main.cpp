@@ -26,6 +26,9 @@ using TStr = std::string;
 using TDict = std::map<TStr, Func>;
 using TName_Func = std::pair<fName, Func>;
 
+/*
+ * get function from dLib
+ */
 resHelper::res_t<TName_Func> getFuncFromDLib(const libHandler::dlib& dl) {
     if (dl.handle() == nullptr) {
         cout << "dl.handle=NULL\n";
@@ -46,10 +49,16 @@ static const size_t indexSM_Size{2};
 static const size_t semaphoreName{3};
 static const size_t startIndexForLibs{4};
 
+/*
+ * get SharedMemory's name from parameters
+ */
 resHelper::res_t<TStr> getSM_Name(std::vector<TStr> params) {
     return env::getNonEmptyString(indexSM_Name, params);
 }
 
+/*
+ * get SharedMemory's size from parameters
+ */
 resHelper::res_t<uint> getSM_Size(std::vector<TStr> params) {
     int res{0};
     static const int defCodeErr{1};
@@ -70,6 +79,9 @@ resHelper::res_t<uint> getSM_Size(std::vector<TStr> params) {
     }
 }
 
+/*
+ * Registration dLib into storage
+ */
 resHelper::res_t<bool> addFuncToDict(libHandler::dlib& dl, TDict& dict) {
     static const int defCodeErr{1};
     auto res = getFuncFromDLib(dl);
@@ -84,6 +96,9 @@ resHelper::res_t<bool> addFuncToDict(libHandler::dlib& dl, TDict& dict) {
     return resHelper::err_t{defCodeErr, "null function pointer"};
 }
 
+/*
+ * Reading data from SharedMemory
+ */
 resHelper::res_t<std::pair<TStr, TStr>> gettingDataFromSM(PCh name, uint size) {
     try {
         sm::Reader reader(name, size);
@@ -99,6 +114,9 @@ resHelper::res_t<std::pair<TStr, TStr>> gettingDataFromSM(PCh name, uint size) {
     }
 }
 
+/*
+ * debug printout
+ */
 TStr errPrintoutBeforeExit(TStr idSM, uint sizeSM, TStr semName) {
     ostringstream ss;
     ss << "name(SM)=" << idSM << " "
@@ -154,7 +172,7 @@ int main(int argc, char *argv[])
             });
         }
 
-        resHelper::res_t<std::pair<TStr, TStr>> smData = gettingDataFromSM(idSM, sizeSM);
+        auto smData = gettingDataFromSM(idSM, sizeSM);
         if (smData.hasError()) {
             return resHelper::retErr(smData);
         }
@@ -211,22 +229,27 @@ int main(int argc, char *argv[])
                 }
             }
             //invoking
-            char* buff = nullptr;
             sm::Sem sem{semName.c_str()};
             sem.acquire();
             try {
-                it->second(serviceParam.c_str(), &buff);
-                writer.write(buff);
-            }  catch (...) {
+                char* buff = nullptr;
+                it->second(serviceParam.c_str(), &buff );
+                if(!buff) {
+                    writeAndRelease("wrong invoking service's function", writer, sem);
+                    return 1;
+                }
+                std::unique_ptr<char[]> ptr{buff};
+                writer.write(ptr.get());
+            } catch (...) {
                 stringstream ss;
                 ss << "Exception while invoking"
                    << errPrintoutBeforeExit(idSM, sizeSM, semName);
                 writeAndRelease(ss.str(), writer, sem);
-
                 return 1;
             }
-            delete buff;
-            if (sem_post(sem.id()) < 0) {
+
+            auto resRelease = sem.release();
+            if (resRelease.hasError() || resRelease.val < 0) {
                 cerr << appPrefix << " [sem_post] Failed \n";
             }
         }

@@ -38,26 +38,40 @@ struct Sem {
     }
 
     resHelper::res_t<int> release() {
-        std::cout << "Dropping semaphore name=" << _name << std::endl;
         if ((_semID = sem_open(_name, 0)) == SEM_FAILED ) {
             return resHelper::err_t{1, "wrong sem_open"};
         }
-        std::cout << "sem_post\n";
-        sem_post(_semID);
-        std::cout << "Semaphore dropped.\n";
+        try {
+            auto res = sem_post(_semID);
+            return {res};
+        } catch (...) {
+            std::cerr << "Exception while releasing semaphore name="
+                      << _name << std::endl;
+            throw;
+        }
+    }
+
+    int wait()const {
+        int res = sem_wait(_semID);
+        if (res < 0) {
+            std::cerr << "Semaphore: [sem_wait] Failed\n";
+            return res;
+        }
         return 0;
     }
 
-    void close() {
-        std::cout << "Semaphore close, name=" << _name << std::endl;
-        if (sem_close(_semID) != 0){
+    int close() {
+        int res1 = sem_close(_semID);
+        if (res1 < 0){
             std::cerr << "Semaphore: [sem_close] Failed\n";
-            return;
+            return res1;
         }
-        if (sem_unlink(_name) < 0){
+        int res2 = sem_unlink(_name);
+        if (res2 < 0){
             std::cerr << "Semaphore: [sem_unlink] Failed\n";
-            return;
+            return res2;
         }
+        return 0;
     }
 
     ~Sem() {

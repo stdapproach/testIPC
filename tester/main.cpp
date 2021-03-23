@@ -118,13 +118,10 @@ int main(int argc, char *argv[])
         writer.write(strData);
 
         auto paramForRun = mkRunningString(rawName, sm1, semName, preLoadedLib);
-        system(paramForRun.c_str());
-        {
-            if (sem_wait(sem.id()) < 0)
-                perror("Tester: sem_wait");
-            if (sem_close(sem.id()) < 0)
-                perror("Tester: sem_close");
-        }
+        if(system(paramForRun.c_str())){};
+
+        sem.wait();
+        sem.close();
 
         auto returnedResult = writer.read();
         cout << appPrefix <<"returnedResult=" << returnedResult.c_str() << endl;
