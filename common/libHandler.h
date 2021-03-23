@@ -21,9 +21,6 @@ using res_t = lib::helperT<helper::osSelector()>::res_t;
 void* loadLib(strT name)
 {
     auto res = lib::loadLibImpl<res_t>(name);
-    if (nullptr == res) {
-        std::cout << "cannot locate the .dll/.so file=" << name << std::endl;
-    }
     return static_cast<void*>(res);
 }
 
@@ -57,8 +54,6 @@ struct dlib {
                     unloadLib(h);
                 }
             );
-        } else {
-            std::cerr << "wrong load dlib" << name << std::endl;
         }
     }
     catch(const std::exception& e) {

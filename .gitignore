@@ -1,8 +1,8 @@
 # Cmake
 CMakeLists.txt.user
 
-# Executables
-bin/*
+# bin
+*.so
 
 # Build files
 build-*

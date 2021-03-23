@@ -14,6 +14,7 @@ include_directories(../common
 add_executable(tester main.cpp
     ../common/processHelper.h
     ../common/ipcH.h
+    ../common/envHelper.h
     ../smLib/sem.h
 )
 

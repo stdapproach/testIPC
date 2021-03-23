@@ -10,6 +10,8 @@
 
 #include "sm_public.h"
 
+#include "envHelper.h"
+
 namespace {
 using strT = std::string;
 using PCh = const char*;
@@ -64,16 +66,46 @@ std::string mkRunningString(strT rawName, smDescr descr, PCh semName, std::vecto
 }
 }
 
-int main()
+/*
+ * argv[0] - file name
+ * argv[1] - (optional) name of desired Service
+ * argv[2] - (optional) argument for invoking desired Service
+ */
+int main(int argc, char *argv[])
 {
     static const char* appPrefix{"Tester: "};
     using namespace std;
 
     cout << appPrefix << "Starting" << endl;
+    const testEnv defEnv{"Type_C", "123456"};
+
+    auto vArgv = env::toVector(argc, argv);
+    testEnv tEnv;
+    auto paramsCount{vArgv.size()};
+    if (paramsCount == 1) {// no add.params
+        tEnv = {"Type_C", "123456"};
+    } else {
+        static const auto minAmountParams{3};
+        if (paramsCount < minAmountParams) {
+            cerr << appPrefix << "wrong amount of parameters=" << paramsCount
+                 << ", should GE of " << minAmountParams << endl;
+            return 1;
+        }
+        auto nameSrv = env::getNonEmptyString(1, vArgv);
+        if (nameSrv.hasError()) {
+            return resHelper::retErr(nameSrv);
+        }
+        auto Arg = env::getNonEmptyString(2, vArgv);
+        if (Arg.hasError()) {
+            return resHelper::retErr(Arg);
+        }
+        tEnv = {nameSrv.val.c_str(), Arg.val.c_str()};
+    }
+
     const smDescr sm1{"/smIn", 128};
     const strT rawName{"gateway"};
     const std::vector<strT> preLoadedLib{"liblib1", "liblib2"};
-    testEnv tEnv{"Type_C", "123456"};
+
     auto helper = libHandler::helperT<os>{};
     PCh semName{"/sem5"};
     try {
