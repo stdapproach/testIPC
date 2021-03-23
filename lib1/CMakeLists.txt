@@ -9,6 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_library(lib1 SHARED
   ../common/lib_global.h
   ../common/libCommon.h
+  ../common/strHelper.h
   lib1.cpp
 )
 

@@ -9,9 +9,10 @@ using strT = std::string;
 
 struct handlerRegistr {
     using key_t = const char* ;
+    using buf_t = char** ;
 
     using fName = key_t(*)();
-    using Func = int (*)(key_t str);
+    using Func = int (*)(key_t str, buf_t);
     void reg(key_t name, Func func) {
         _map[name] = func;
     }

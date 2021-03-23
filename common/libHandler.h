@@ -30,9 +30,7 @@ void* loadLib(strT name)
 bool unloadLib(void* h)
 {
     auto res = lib::unloadLibImpl<res_t>(h);
-    if (res) {
-        std::cout << "dLib unloaded SUCCESS\n";
-    } else {
+    if (!res) {
         std::cout << "dLib unloaded WRONG\n";
     }
     return res;
@@ -51,18 +49,17 @@ struct dlib {
     dlib& operator=(dlib &&) noexcept = default;
     explicit operator bool() const { return static_cast<bool>(_handle); }
     dlib(strT name) try :_name{name} {
-        std::cout << "start load dlib " << name << ", ";
         void* h = loadLib(name);
         if (h) {
             _handle = std::shared_ptr<void>(
                 h,
                 [name](void* h) {
-                    std::cout << "unload dlib " << name << ", ";
                     unloadLib(h);
                 }
             );
+        } else {
+            std::cerr << "wrong load dlib" << name << std::endl;
         }
-        std::cout << "finish load dLib\n";
     }
     catch(const std::exception& e) {
         std::cout << "dlib, exception in Ctr: " << e.what() << std::endl;

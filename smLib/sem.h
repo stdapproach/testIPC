@@ -19,7 +19,6 @@ struct Sem {
     Sem(PCh name) : _name{name} {}
 
     void acquire() {
-        std::cout << "Acquiring Semaphore name=" << _name << std::endl;
         try {
             _semID = sem_open(_name, O_CREAT, 0600, 0);
             auto pid = processHelper::getpid();
@@ -28,7 +27,6 @@ struct Sem {
                 return;
             }
             _isOpened = true;
-            std::cout << "Semaphore name=" << _name << " is taken.\nWaiting for it to be dropped.\n";
         } catch(const std::exception& e) {
             std::cout << "Sem, exception while opening: " << e.what() << std::endl;
             throw;

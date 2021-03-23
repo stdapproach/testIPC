@@ -37,9 +37,9 @@ void Writer::write(std::string data) const{
 
 Writer::~Writer() {
     try {
-        std::cout << "start Writer::~Writer, id=" << _internalID << std::endl;
         const auto res{cleanup()};
         if(res.hasError()) {
+            debugPrintout("");
             errHandler(res);
         } else {
             if (_unlinkRequired) {

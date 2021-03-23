@@ -122,8 +122,7 @@ resHelper::res_t<std::pair<TStr, TStr>> gettingDataFromSM(PCh name, uint size) {
  */
 int main(int argc, char *argv[])
 {
-    cout << "gateway: argc=" << argc << endl;
-
+    const char* appPrefix{"Gateway: "};
     std::vector<libHandler::dlib> vec;
     std::map<TStr, Func> Dict;
     auto vArgv = toVector(argc, argv);
@@ -134,25 +133,24 @@ int main(int argc, char *argv[])
             return resHelper::retErr(nameSM);
         }
         auto idSM{nameSM.val.c_str()};
-        cout << "name(SM1)=" << idSM << endl;
+        cout << appPrefix << "name(SM)=" << idSM << " ";
 
         resHelper::res_t<uint> resSizeSM = getSM_Size(vArgv);
         if(resSizeSM.hasError()) {
             return resHelper::retErr(resSizeSM);
         }
         uint sizeSM{resSizeSM.val};
-        std::cout << "size(SM1)=" << sizeSM <<endl;
+        std::cout << "size(SM)=" << sizeSM << " ";
 
         auto rawSemName = getNonEmptyString(semaphoreName, vArgv);
         if (rawSemName.hasError()) {
             return resHelper::retErr(rawSemName);
         }
+
         auto semName = rawSemName.val;
-        cout << "semName=" << semName << endl;
+        cout << "semaphoreName=" << semName << endl;
 
-
-        cout << "prepared handlers from auto-loaded dLib\n";
-        {//first fulfilling of Dict
+        {//first fulfilling of Dict by auto-loaded dLib
             copy(vArgv.begin()+startIndexForLibs, vArgv.end(), back_inserter(vec));
             std::for_each(begin(vec), end(vec),
                 [&Dict](auto& dl) {
@@ -160,13 +158,23 @@ int main(int argc, char *argv[])
             });
         }
 
-        cout << "getting data from SM\n";
         resHelper::res_t<std::pair<TStr, TStr>> smData = gettingDataFromSM(idSM, sizeSM);
         if (smData.hasError()) {
             return resHelper::retErr(smData);
         }
         TStr serviceName{smData.val.first};
         TStr serviceParam{smData.val.second};
+
+        ipc::Writer writer{idSM, sizeSM, appPrefix};
+        sm::Sem sem{semName.c_str()};
+
+        auto writeAndRelease = [appPrefix](std::string result, ipc::Writer& writer, sm::Sem& sem) {
+            sem.acquire();
+            writer.write(result);
+            if (sem_post(sem.id()) < 0) {
+                cerr << appPrefix << "Gateway: [sem_post] Failed \n";
+            }
+        };
 
         {//search param among the loaded map
             auto key = serviceName.c_str();
@@ -183,37 +191,42 @@ int main(int argc, char *argv[])
                     auto name = descr.first();
                     Dict.emplace(name, descr.second);
                 } else {
-                    cerr << "wrong getting function from " << vec.back().name() << endl;
+                    ostringstream os;
+                    os << appPrefix << "wrong getting function from " << vec.back().name();
+                    cerr << os.str().c_str() << endl;
+                    writeAndRelease(os.str(), writer, sem);
                     return 1;
                 }
                 it = Dict.find(key);
                 if (it == Dict.end()) {
-                    cerr << "NOT FOUND key=" << key << " after loading dLib by name"<< endl;
+                    ostringstream os;
+                    os << appPrefix << "NOT FOUND key=" << key << " after loading dLib by name";
+                    cerr << os.str().c_str() << endl;
+                    writeAndRelease(os.str(), writer, sem);
                     return 1;
                 }
             }
             //invoking
-            const auto RESULT{it->second(serviceParam.c_str())};
-            cout << "RESULT=" << RESULT << endl;
-
-            //write result
-            ipc::Writer writer{idSM, sizeSM, "Gateway"};
-
+            char* buff = nullptr;
             sm::Sem sem{semName.c_str()};
             sem.acquire();
-            printf("Gateway: I am done! Release Semaphore\n");
-            {
-                writer.write("QQQ_AAA_ZZZ");
+            try {
+                it->second(serviceParam.c_str(), &buff);
+                writer.write(buff);
+            }  catch (...) {
+                writeAndRelease("Exception while invoking", writer, sem);
+                return 1;
             }
-            if (sem_post(sem.id()) < 0)
-                cerr << "Gateway: [sem_post] Failed \n";
-            cout << "Gateway: ok releasing sem\n";
+            delete buff;
+            if (sem_post(sem.id()) < 0) {
+                cerr << appPrefix << " [sem_post] Failed \n";
+            }
         }
     } else {
-        cerr << "not enough parameters to invoke\n";
+        cerr << appPrefix<< "not enough parameters to invoke\n";
         return 1;
     }
 
-    cout << "gateway: Leaving" << endl;
+    cout << appPrefix << "Leaving" << endl;
     return 0;
 }

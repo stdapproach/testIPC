@@ -66,9 +66,10 @@ std::string mkRunningString(strT rawName, smDescr descr, PCh semName, std::vecto
 
 int main()
 {
+    static const char* appPrefix{"Tester: "};
     using namespace std;
 
-    cout << "Tester: Starting" << endl;
+    cout << appPrefix << "Starting" << endl;
     const smDescr sm1{"/smIn", 128};
     const strT rawName{"gateway"};
     const std::vector<strT> preLoadedLib{"liblib1", "liblib2"};
@@ -77,29 +78,26 @@ int main()
     PCh semName{"/sem5"};
     try {
         sm::Sem sem(semName);
-        cout << "Tester: acquire\n";
         sem.acquire();
 
         const bool unlinkRequired{false};
-        ipc::Writer writer{sm1.name, sm1.size, "Tester", unlinkRequired};
+        ipc::Writer writer{sm1.name, sm1.size, appPrefix, unlinkRequired};
         writer.write(mkData(tEnv));
 
         auto paramForRun = mkRunningString(rawName, sm1, semName, preLoadedLib);
         system(paramForRun.c_str());
-        cout << "QQQ_0\n";
         {
-            if (sem_wait(sem.id()) < 0 )
-                perror("QQQ_sem_wait");
-            if ( sem_close(sem.id()) < 0 )
-                perror("QQQ_sem_close");
+            if (sem_wait(sem.id()) < 0)
+                perror("Tester: sem_wait");
+            if (sem_close(sem.id()) < 0)
+                perror("Tester: sem_close");
         }
-        cout << "QQQ_1\n";
-        auto reternedResult = writer.read();
-        cout << "QQQ_2_returnedResult=" << reternedResult.c_str() << endl;
+
+        auto returnedResult = writer.read();
+        cout << appPrefix <<"returnedResult=" << returnedResult.c_str() << endl;
     }  catch (...) {
-        cout << "Tester: unknown exception raised" << endl;
+        cout << appPrefix <<"unknown exception raised" << endl;
         throw ;
     }
-    cout << "Tester: Leaving" << endl;
     return 0;
 }

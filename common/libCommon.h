@@ -4,9 +4,8 @@
 #include "lib_global.h"
 
 extern "C" {
-LIB1_EXPORT int foo();
 LIB1_EXPORT const char* handlerName();
-LIB1_EXPORT int handlerFunc(const char* str);
+LIB1_EXPORT int handlerFunc(const char* str, char** buffer);
 }
 
 #endif // LIB1_H

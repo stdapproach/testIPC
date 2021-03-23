@@ -45,7 +45,7 @@ constexpr auto os{helper::osSelector()};
             std::cout << "it's impossible to get function from nullptr\n";
             return defResult;
         }
-        //auto raw = GetProcAddress(static_cast<libRaw_t>(handler), nameF);
+
         auto raw = dlsym(handler, nameF.c_str());
         if(!raw) {
             std::cout << "there is no function with name " << nameF.c_str() << std::endl;
