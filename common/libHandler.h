@@ -54,6 +54,8 @@ struct dlib {
                     unloadLib(h);
                 }
             );
+        } else {
+            std::cerr << "wrong loadLib, name=" << _name << std::endl;
         }
     }
     catch(const std::exception& e) {
@@ -65,7 +67,7 @@ struct dlib {
         throw;
     }
     ~dlib() = default;
-    void* handle(){return _handle.get();}
+    void* handle()const {return _handle.get();}
     strT name()const{return _name;};
 private:
     std::shared_ptr<void> _handle;

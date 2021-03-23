@@ -25,8 +25,8 @@ struct smDescr {
 };
 
 struct testEnv {
-    PCh serviceName;
-    PCh argument;
+    strT serviceName;
+    strT argument;
 };
 
 std::string mkData(testEnv env) {
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
         if (Arg.hasError()) {
             return resHelper::retErr(Arg);
         }
-        tEnv = {nameSrv.val.c_str(), Arg.val.c_str()};
+        tEnv = {nameSrv.val, Arg.val};
     }
 
     const smDescr sm1{"/smIn", 128};
@@ -114,7 +114,8 @@ int main(int argc, char *argv[])
 
         const bool unlinkRequired{false};
         ipc::Writer writer{sm1.name, sm1.size, appPrefix, unlinkRequired};
-        writer.write(mkData(tEnv));
+        std::string strData{mkData(tEnv)};
+        writer.write(strData);
 
         auto paramForRun = mkRunningString(rawName, sm1, semName, preLoadedLib);
         system(paramForRun.c_str());

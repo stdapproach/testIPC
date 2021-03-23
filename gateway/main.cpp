@@ -26,7 +26,7 @@ using TStr = std::string;
 using TDict = std::map<TStr, Func>;
 using TName_Func = std::pair<fName, Func>;
 
-resHelper::res_t<TName_Func> getFuncFromDLib(libHandler::dlib& dl) {
+resHelper::res_t<TName_Func> getFuncFromDLib(const libHandler::dlib& dl) {
     if (dl.handle() == nullptr) {
         cout << "dl.handle=NULL\n";
         return resHelper::err_t{1, "unloaded dLib"};
@@ -132,7 +132,6 @@ int main(int argc, char *argv[])
         }
         auto idSM{nameSM.val.c_str()};
 
-
         resHelper::res_t<uint> resSizeSM = getSM_Size(vArgv);
         if(resSizeSM.hasError()) {
             return resHelper::retErr(resSizeSM);
@@ -182,7 +181,7 @@ int main(int argc, char *argv[])
                 auto helper = libHandler::helperT<os>{};
                 TStr name = helper.prefixLib+key;
                 vec.emplace_back(helper.getFullDLibName(name));
-                auto& newLib{vec.back()};
+                const auto& newLib{vec.back()};
                 if (!newLib.handle()) {
                     ostringstream os;
                     os << appPrefix << "[wrong loading additional dLib] " << newLib.name()
@@ -190,7 +189,7 @@ int main(int argc, char *argv[])
                     writeAndRelease(os.str(), writer, sem);
                     return 1;
                 }
-                auto res2 = getFuncFromDLib(newLib);
+                const auto res2 = getFuncFromDLib(newLib);
                 if (!res2.hasError()) {
                     auto descr = res2.val;
                     auto name = descr.first();

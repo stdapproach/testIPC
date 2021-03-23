@@ -19,6 +19,7 @@ add_executable(gateway main.cpp
     ../common/libHandler_Win.h
     ../common/libHandler_Nix.h
     ../common/resHelper.h
+    ../common/envHelper.h
     )
 
 find_library(LIB_SM smLib-static ../build)
