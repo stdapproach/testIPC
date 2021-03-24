@@ -11,6 +11,9 @@
     #include "libHandler_Win.h"
 #endif
 
+/*
+ * Crossplatform dLib handlers
+ */
 namespace libHandler{
 using strT = std::string;
 using res_t = lib::helperT<helper::osSelector()>::res_t;
@@ -24,6 +27,9 @@ void* loadLib(strT name)
     return static_cast<void*>(res);
 }
 
+/*
+ * crossplatfrom function to unload dll/so
+ */
 bool unloadLib(void* h)
 {
     auto res = lib::unloadLibImpl<res_t>(h);
@@ -33,11 +39,17 @@ bool unloadLib(void* h)
     return res;
 }
 
+/*
+ * crossplatfrom function to get function's pointer from dLib
+ */
 template<typename F>
 F getFunc(void* handler, strT nameF) {
     return lib::getLibFunctionImpl<F>(handler, nameF);
 }
 
+/*
+ * dLib's handling
+ */
 struct dlib {
     dlib() noexcept = delete;
     dlib(dlib const&) noexcept = default;

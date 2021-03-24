@@ -6,6 +6,10 @@
 
 namespace resHelper {
 static const int no_err{0};
+
+/*
+ * wrapper to handle error
+ */
 struct err_t {
     int code;
     std::string descr;
@@ -14,6 +18,9 @@ struct err_t {
     bool has()const{return (code != no_err);}
 };
 
+/*
+ * wrapper to handle the function's result of
+ */
 template<typename T>
 struct res_t {
     using val_t = T;
@@ -26,6 +33,9 @@ private:
     bool hasResult{false};
 };
 
+/*
+ * helper to return error's code
+ */
 template <typename T>
 int retErr(const res_t<T>& res) {
     std::cerr << res.error.descr.c_str() << std::endl;

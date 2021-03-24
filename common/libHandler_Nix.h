@@ -5,6 +5,9 @@
 #include <iostream>
 #include <string>
 
+/*
+ * dLib handler for Linux
+ */
 namespace lib {
 using strT = std::string;
 

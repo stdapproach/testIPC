@@ -3,6 +3,9 @@
 
 namespace helper {
 
+/*
+ * Helpers for writing platform's specific code
+ */
 enum class supportedOS {
     //unknown,
     windows,

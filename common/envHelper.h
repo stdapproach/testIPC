@@ -6,6 +6,9 @@
 
 #include "resHelper.h"
 
+/*
+ * Handling main function's arguments
+ */
 namespace env {
 using TStr = std::string;
 

@@ -5,6 +5,7 @@
 #include <iostream>
 
 namespace lib {
+using strT = std::string;
 
 #ifdef OSSELECTOR_POSIX
 //
@@ -23,7 +24,7 @@ namespace lib {
     using libRaw_t = helperT<os>::libRaw_t;
 
     template<>
-    auto loadLibImpl<res_t>(types::Str name)->res_t
+    auto loadLibImpl<res_t>(strT name)->res_t
     {
         libRaw_t hGetProcIDDLL = LoadLibrary(name);
         return static_cast<res_t>(hGetProcIDDLL);
@@ -45,7 +46,7 @@ namespace lib {
     }
 
     template<typename F>
-    F getLibFunctionImpl(res_t handler, types::Str nameF)
+    F getLibFunctionImpl(res_t handler, strT nameF)
     {
         auto defResult{nullptr};
         if(!handler) {
