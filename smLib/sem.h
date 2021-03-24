@@ -47,7 +47,6 @@ struct Sem {
         } catch (...) {
             std::cerr << "Exception while releasing semaphore name="
                       << _name << std::endl;
-            throw;
         }
     }
 
@@ -61,6 +60,7 @@ struct Sem {
     }
 
     int close() {
+        _isOpened = false;
         int res1 = sem_close(_semID);
         if (res1 < 0){
             std::cerr << "Semaphore: [sem_close] Failed\n";
@@ -75,6 +75,9 @@ struct Sem {
     }
 
     ~Sem() {
+        if(_isOpened) {
+            release();
+        }
     }
 
     sem_t* id(){return _semID;}

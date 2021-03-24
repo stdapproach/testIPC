@@ -182,12 +182,10 @@ int main(int argc, char *argv[])
         ipc::Writer writer{idSM, sizeSM, appPrefix};
         sm::Sem sem{semName.c_str()};
 
-        auto writeAndRelease = [appPrefix](std::string result, ipc::Writer& writer, sm::Sem& sem) {
+        auto AcquireAndWrite = [](std::string result, ipc::Writer& writer, sm::Sem& sem, int retResult) {
             sem.acquire();
             writer.write(result);
-            if (sem_post(sem.id()) < 0) {
-                cerr << appPrefix << "Gateway: [sem_post] Failed \n";
-            }
+            return retResult;
         };
 
         {//search param among the loaded map
@@ -204,8 +202,7 @@ int main(int argc, char *argv[])
                     ostringstream os;
                     os << appPrefix << "[wrong loading additional dLib] " << newLib.name()
                        << " " << errPrintoutBeforeExit(idSM, sizeSM, semName).c_str();
-                    writeAndRelease(os.str(), writer, sem);
-                    return 1;
+                    return AcquireAndWrite(os.str(), writer, sem, 1);
                 }
                 const auto res2 = getFuncFromDLib(newLib);
                 if (!res2.hasError()) {
@@ -216,16 +213,14 @@ int main(int argc, char *argv[])
                     ostringstream os;
                     os << appPrefix << "[after loading additional dLib] wrong getting function from " << newLib.name()
                        << errPrintoutBeforeExit(idSM, sizeSM, semName);
-                    writeAndRelease(os.str(), writer, sem);
-                    return 1;
+                    return AcquireAndWrite(os.str(), writer, sem, 1);
                 }
                 it = Dict.find(key);
                 if (it == Dict.end()) {
                     ostringstream os;
                     os << appPrefix << "NOT FOUND key=" << key << " after loading dLib by name"
                        << errPrintoutBeforeExit(idSM, sizeSM, semName);
-                    writeAndRelease(os.str(), writer, sem);
-                    return 1;
+                    return AcquireAndWrite(os.str(), writer, sem, 1);
                 }
             }
             //invoking
@@ -235,8 +230,7 @@ int main(int argc, char *argv[])
                 char* buff = nullptr;
                 it->second(serviceParam.c_str(), &buff );
                 if(!buff) {
-                    writeAndRelease("wrong invoking service's function", writer, sem);
-                    return 1;
+                    return AcquireAndWrite("wrong invoking service's function", writer, sem, 1);
                 }
                 std::unique_ptr<char[]> ptr{buff};
                 writer.write(ptr.get());
@@ -244,13 +238,7 @@ int main(int argc, char *argv[])
                 stringstream ss;
                 ss << "Exception while invoking"
                    << errPrintoutBeforeExit(idSM, sizeSM, semName);
-                writeAndRelease(ss.str(), writer, sem);
-                return 1;
-            }
-
-            auto resRelease = sem.release();
-            if (resRelease.hasError() || resRelease.val < 0) {
-                cerr << appPrefix << " [sem_post] Failed \n";
+                return AcquireAndWrite(ss.str(), writer, sem, 1);
             }
         }
     } else {
